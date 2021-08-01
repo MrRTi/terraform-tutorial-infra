@@ -9,10 +9,9 @@ module "instance" {
   instance_ami   = var.instance_ami
   ec2_sg_id      = module.networking.ec2_sg_id
 }
-/*
+
 module "application" {
   source         = "./modules/application"
   image          = var.image
   host           = "ssh://${var.instance_user}@${module.instance.public_ip}:22"
 }
-*/
