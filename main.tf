@@ -8,6 +8,10 @@ terraform {
       source  = "poseidon/ct"
       version = "0.8.0"
     }
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "2.11.0"
+    }
   }
 
   required_version = ">= 0.15.3"
@@ -18,6 +22,10 @@ provider "aws" {
   region  = "us-east-1"
 }
 
+provider "docker" {
+  host = "ssh://${local.instance_user}@${aws_instance.app_server.public_ip}:22"
+}
+
 provider "ct" {}
 
 locals {
@@ -25,6 +33,23 @@ locals {
   instance_ami = "ami-09e2e5104f310ffb5"
   instance_key_file    = "ssh_keys/id_rsa_instance_key.pub"
   instance_user = "core"
+  image = "rti13/terraform-tutorial:latest"
+}
+
+resource "docker_image" "app" {
+  name = local.image
+}
+
+resource "docker_container" "app" {
+  image = docker_image.app.latest
+  name  = "app"
+  env = [
+    "PORT=4000",
+  ]
+  ports {
+    internal = 4000
+    external = 80
+  }
 }
 
 data "ct_config" "config" {
