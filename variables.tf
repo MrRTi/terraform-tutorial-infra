@@ -22,3 +22,8 @@ variable "instance_user" {
   description = "instance user"
   type = string
 }
+
+variable "env" {
+  description = "environment"
+  type = string
+}
