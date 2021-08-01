@@ -2,4 +2,6 @@
 .aws
 ssh_keys/**
 *.swp
-
+secrets.tfvars
+terraform.tfstate.d
+tfvars
