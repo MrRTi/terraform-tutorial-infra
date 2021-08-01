@@ -1,2 +1,4 @@
 **/.terraform
 .aws
+ssh_keys/**
+
