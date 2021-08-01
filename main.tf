@@ -22,10 +22,6 @@ provider "aws" {
   region  = "us-east-1"
 }
 
-provider "docker" {
-  host = "ssh://${local.instance_user}@${aws_instance.app_server.public_ip}:22"
-}
-
 provider "ct" {}
 
 locals {
@@ -50,6 +46,7 @@ resource "docker_container" "app" {
     internal = 4000
     external = 80
   }
+  restart = "unless-stopped"
 }
 
 data "ct_config" "config" {
@@ -91,3 +88,15 @@ module "ec2_sg" {
   egress_rules        = ["all-all"]
 }
 
+resource "aws_eip" "eip" {
+  vpc = true
+}
+
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.app_server.id
+  allocation_id = aws_eip.eip.id
+}
+
+provider "docker" {
+  host = "ssh://${local.instance_user}@${aws_eip.eip.public_ip}:22"
+}
