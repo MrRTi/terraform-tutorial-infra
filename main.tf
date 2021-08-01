@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.38"
     }
+    ct = {
+      source  = "poseidon/ct"
+      version = "0.8.0"
+    }
   }
 
   required_version = ">= 0.15.3"
@@ -14,15 +18,28 @@ provider "aws" {
   region  = "us-east-1"
 }
 
+provider "ct" {}
 
 locals {
   # FEDORA-COREOS
   instance_ami = "ami-09e2e5104f310ffb5"
+  instance_key_file    = "ssh_keys/id_rsa_instance_key.pub"
+  instance_user = "core"
+}
+
+data "ct_config" "config" {
+  content = templatefile("config.tpl", {
+    key = file(local.instance_key_file),
+    user = local.instance_user
+  })
+  strict = true
 }
 
 resource "aws_instance" "app_server" {
   ami           = local.instance_ami
   instance_type = "t2.micro"
+
+  user_data = data.ct_config.config.rendered
 
   tags = {
     Name = "Study AppServer"
